@@ -2,10 +2,10 @@
 
 > Udagram is a simple cloud application developed alongside the Udacity Cloud Engineering Nanodegree. It allows users to register and log into a web client, post photos to the feed, and process photos using an image filtering microservice.
 
+![](aws-ebs.png)
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Node.js_logo.svg/200px-Node.js_logo.svg.png)
 ![](https://upload.wikimedia.org/wikipedia/commons/7/79/Docker_%28container_engine%29_logo.png)
 ![](Travis_CI_Logo.png)
-![](aws-ebs.png)
 
 ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)
 
