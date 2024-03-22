@@ -1,101 +1,142 @@
-import { Router, Request, Response } from 'express';
-import { FeedItem } from '../models/FeedItem';
-import * as AWS from '../../../../aws';
-import { NextFunction } from 'connect';
-import * as c from '../../../../config/config';
-import * as jwt from 'jsonwebtoken';
+import { Router, Request, Response } from "express";
+import { FeedItem } from "../models/FeedItem";
+import * as AWS from "../../../../aws";
+import { NextFunction } from "connect";
+import * as c from "../../../../config/config";
+import * as jwt from "jsonwebtoken";
+import {
+  filterImageFromURL,
+  deleteLocalFiles,
+  isValidImage,
+  isValidUrl,
+} from "../utils/util";
 
 const router: Router = Router();
 
-
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
- //  return next();
-    if (!req.headers || !req.headers.authorization){
-        return res.status(401).send({ message: 'No authorization headers.' });
-    }
-    
+  //  return next();
+  if (!req.headers || !req.headers.authorization) {
+    return res.status(401).send({ message: "No authorization headers." });
+  }
 
-    const token_bearer = req.headers.authorization.split(' ');
-    if(token_bearer.length != 2){
-        return res.status(401).send({ message: 'Malformed token.' });
+  const token_bearer = req.headers.authorization.split(" ");
+  if (token_bearer.length != 2) {
+    return res.status(401).send({ message: "Malformed token." });
+  }
+
+  const token = token_bearer[1];
+  return jwt.verify(token, c.config.jwt.secret, (err, decoded) => {
+    if (err) {
+      return res
+        .status(500)
+        .send({ auth: false, message: "Failed to authenticate." });
     }
-    
-    const token = token_bearer[1];
-    return jwt.verify(token, c.config.jwt.secret , (err, decoded) => {
-      if (err) {
-        return res.status(500).send({ auth: false, message: 'Failed to authenticate.' });
-      }
-      return next();
-    });
+    return next();
+  });
 }
 
 // Get all feed items
-router.get('/', async (req: Request, res: Response) => {
-    const items = await FeedItem.findAndCountAll({order: [['id', 'DESC']]});
-    console.log("items: ",items)
-    items.rows.map((item) => {
-            if(item.url) {
-                item.url = AWS.getGetSignedUrl(item.url);
-            }
-    });
-    res.send(items);
+router.get("/", async (req: Request, res: Response) => {
+  const items = await FeedItem.findAndCountAll({ order: [["id", "DESC"]] });
+  items.rows.map((item) => {
+    if (item.url) {
+      item.url = AWS.getGetSignedUrl(item.url);
+    }
+  });
+  res.send(items);
 });
 
 // Get a specific resource
-router.get('/:id', 
-    async (req: Request, res: Response) => {
-    let { id } = req.params;
-    const item = await FeedItem.findByPk(id);
-    res.send(item);
+router.get("/:id", async (req: Request, res: Response) => {
+  let { id } = req.params;
+  const item = await FeedItem.findByPk(id);
+  res.send(item);
 });
 
 // update a specific resource
-router.patch('/:id', 
-    requireAuth, 
-    async (req: Request, res: Response) => {
-        //@TODO try it yourself
-        res.send(500).send("not implemented")
+router.patch("/:id", requireAuth, async (req: Request, res: Response) => {
+  //@TODO try it yourself
+  res.send(500).send("not implemented");
 });
-
 
 // Get a signed url to put a new item in the bucket
-router.get('/signed-url/:fileName', 
-    requireAuth, 
-    async (req: Request, res: Response) => {
+router.get(
+  "/signed-url/:fileName",
+  requireAuth,
+  async (req: Request, res: Response) => {
     let { fileName } = req.params;
-    console.log("signed-url-file-name: ",fileName)
+    console.log("signed-url-file-name: ", fileName);
     const url = AWS.getPutSignedUrl(fileName);
-    res.status(201).send({url: url});
-});
+    res.status(201).send({ url: url });
+  }
+);
 
-// Post meta data and the filename after a file is uploaded 
+// Post meta data and the filename after a file is uploaded
 // NOTE the file name is they key name in the s3 bucket.
 // body : {caption: string, fileName: string};
-router.post('/', 
-    requireAuth, 
-    async (req: Request, res: Response) => {
-    const caption = req.body.caption;
-    const fileName = req.body.url;
+router.post("/", requireAuth, async (req: Request, res: Response) => {
+  const caption = req.body.caption;
+  const fileName = req.body.url;
 
-    // check Caption is valid
-    if (!caption) {
-        return res.status(400).send({ message: 'Caption is required or malformed' });
-    }
+  // check Caption is valid
+  if (!caption) {
+    return res
+      .status(400)
+      .send({ message: "Caption is required or malformed" });
+  }
 
-    // check Filename is valid
-    if (!fileName) {
-        return res.status(400).send({ message: 'File url is required' });
-    }
+  // check Filename is valid
+  if (!fileName) {
+    return res.status(400).send({ message: "File url is required" });
+  }
 
-    const item = await new FeedItem({
-            caption: caption,
-            url: fileName
-    });
+  const item = await new FeedItem({
+    caption: caption,
+    url: fileName,
+  });
 
-    const saved_item = await item.save();
+  const saved_item = await item.save();
 
-    saved_item.url = AWS.getGetSignedUrl(saved_item.url);
-    res.status(201).send(saved_item);
+  saved_item.url = AWS.getGetSignedUrl(saved_item.url);
+  res.status(201).send(saved_item);
 });
+
+// Endpoint to filter an image from a public url
+router.get(
+  "/filteredimage",
+  requireAuth,
+  async (req: Request, res: Response) => {
+    if (
+      req.query &&
+      req.query.image_url &&
+      typeof req.query.image_url === "string"
+    ) {
+      const imageUrl: string = <string>req.query.image_url;
+
+      if (!isValidUrl(imageUrl)) {
+        return res.status(400).send({ error: "image_url is invalid" });
+      }
+
+      if (!isValidImage(imageUrl)) {
+        return res
+          .status(422)
+          .send({ error: "image_url is not a valid image" });
+      }
+
+      try {
+        const image = await filterImageFromURL(imageUrl);
+        return res.sendFile(image, async () => {
+          await deleteLocalFiles([image]);
+        });
+      } catch (error) {
+        return res
+          .status(422)
+          .send({ error: "image_url could not be processed" });
+      }
+    } else {
+      res.status(400).send({ error: "image_url is invalid" });
+    }
+  }
+);
 
 export const FeedRouter: Router = router;
