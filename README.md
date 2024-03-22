@@ -13,18 +13,16 @@
 
 The project is split into three parts:
 1. [The Simple Frontend](/udagram-frontend)
-A basic Ionic client web application which consumes the RestAPI Backend. 
+A basic Ionic client web application that consumes the RestAPI Backend. 
 2. [The RestAPI Feed Backend](/udagram-restapi-feed), a Node-Express feed microservice.
 3. [The RestAPI User Backend](/udagram-restapi-user), a Node-Express user microservice.
 
 ## Getting Setup
 
-> _tip_: this frontend is designed to work with the RestAPI backends). It is recommended you stand up the backend first, test using Postman, and then the frontend should integrate.
-
 ### Installing Node and NPM
 This project depends on Nodejs and Node Package Manager (NPM). Before continuing, you must download and install Node (NPM is included) from [https://nodejs.com/en/download](https://nodejs.org/en/download/).
 
-### Installing Ionic Cli
+### Installing Ionic CLI
 The Ionic Command Line Interface is required to serve and build the frontend. Instructions for installing the CLI can be found in the [Ionic Framework Docs](https://ionicframework.com/docs/installation/cli).
 
 ### Installing project dependencies
@@ -44,11 +42,11 @@ You'll need to create a new node server. Open a new terminal within the project 
 
 
 ### Configure The Backend Endpoint
-Ionic uses enviornment files located in `./src/enviornments/enviornment.*.ts` to load configuration variables at runtime. By default `environment.ts` is used for development and `enviornment.prod.ts` is used for produciton. The `apiHost` variable should be set to your server url either locally or in the cloud.
+Ionic uses environment files located in `./src/environments/enviornment.*.ts` to load configuration variables at runtime. By default `environment.ts` is used for development and `enviornment.prod.ts` is used for production. The `apiHost` variable should be set to your server URL either locally or in the cloud.
 
 ***
 ### Running the Development Server
-Ionic CLI provides an easy to use development server to run and autoreload the frontend. This allows you to make quick changes and see them in real time in your browser. To run the development server, open terminal and run:
+Ionic CLI provides an easy-to-use development server to run and auto-reload the frontend. This allows you to make quick changes and see them in real-time in your browser. To run the development server, open the terminal and run:
 
 ```bash
 ionic serve
@@ -63,13 +61,13 @@ ionic build
 
 ### Running project locally as docker containers
 
-Steps 1 - 3 are one time only steps. 
+Steps 1 - 3 are one-time-only steps. 
 
 1. Set the appropriate values for the below environment variables: 
 ```
 export POSTGRESS_USERNAME=<postgress database username>
 export POSTGRESS_PASSWORD=<postgress database password>
-export POSTGRESS_DB=<postgress dababase name>
+export POSTGRESS_DB=<postgress database name>
 export POSTGRESS_HOST=<postgress database instance hostname>
 export AWS_REGION=<aws region where bucket and database are located>
 export AWS_PROFILE=<aws profile for credentials>
@@ -89,7 +87,7 @@ export JWT_SECRET=<secret string for encoding passwords>
 
 6. Push images -
 
-This step is optional for running the app as docker container. 
+This step is optional for running the app as a docker container. 
 ```
 docker push <dockerhubusername>/udagram-restapi-feed:latest
 docker push <dockerhubusername>/udagram-restapi-user:latest
@@ -97,7 +95,7 @@ docker push <dockerhubusername>/udagram-frontend:local
 docker push <dockerhubusername>/udagram-reverseproxy:latest
 ```
 
-If you don't want to do this step. Change the line that says ```imagePullPolicy: Always``` to ```imagePullPolicy: Never``` in all *-deployment.yaml files in udacity-c3-deployment/k8s/. This is required to run the app on a local kubernetes cluster. 
+If you don't want to do this step. Change the line that says ```imagePullPolicy: Always``` to ```imagePullPolicy: Never``` in all *-deployment.yaml files in udacity-c3-deployment/k8s/. This is required to run the app on a local Kubernetes cluster. 
 
 7. Run app - 
 ```cd udagram-deployment/docker/ && docker-compose up```
@@ -111,14 +109,14 @@ Open localhost:8100 in browser.
 
 ***
 
-### Running app as a deployement on local kubernetes
-If you have already followed steps for deploying as docker container then you can follow steps below. If not, then follow steps 1-6 from the previous section and then continue from here.
+### Running app as a deployment on local Kubernetes
+If you have already followed steps for deploying as a docker container then you can follow the steps below. If not, then follow steps 1-6 from the previous section and then continue from here.
 
-1. Enable kubernetes on docker desktop.
+1. Enable Kubernetes on docker desktop.
 
 Docker desktop app > Preferences(Settings on windows) > Kubernetes > Check "Enable Kubernetes"
 
-This will take a few minutes to setup and download the cli.
+This will take a few minutes to setup and download the CLI.
 
 Verify running the below command on terminal
 
@@ -156,7 +154,7 @@ Open localhost:8100 in browser.
 
 ### Using Travis CI to deploy on AWS infrastructure.
 
-The repo has travis ci build instructions in .travisci.yaml. Follow below steps to create a build plan.
+The repo has travis ci build instructions in .travisci.yaml. Follow the below steps to create a build plan.
 
 1. Integrate GIT with Travis CI - https://travis-ci.org/
 2. On Travis CI setup the following env variables for the repo/branch.
@@ -164,8 +162,8 @@ The repo has travis ci build instructions in .travisci.yaml. Follow below steps 
 DOCKER_USERNAME=<dockerhub username>
 DOCKER_PASSWORD=<dockerhub password>
 AWS_CREDENTIALS=<base64 encoded AWS IAM credentials with adequate policy>
-POSTGRESS_USERNAME=<base64 encoded postgress db username>
-POSTGRESS_PASSWORD=<base64 encoded postgress db password>
+POSTGRESS_USERNAME=<base64 encoded PostgreSQL db username>
+POSTGRESS_PASSWORD=<base64 encoded PostgreSQL db password>
 AWS_BUCKET=<aws bucket name for storing app images>
 AWS_PROFILE=<aws profile>
 AWS_REGION=<aws region>
@@ -191,6 +189,7 @@ POSTGRESS_HOST=<postgress db instance hostname>
 * [Javascript](https://en.wikipedia.org/wiki/JavaScript) - The programming language used
 * [Node.js®](https://nodejs.org/) - The JavaScript runtime used
 * [Express.js®](https://nodejs.org/) - The web application framework used
+* [PostgreSQL](https://www.postgresql.org/) - Relational Database used
 * [AWS Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/) - AWS deployment and scaling service used
 * [Docker](https://www.docker.com/) - The container engine used
 * [Travis CI](https://travis-ci.com/) - The continuous integration service used
